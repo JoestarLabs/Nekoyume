@@ -45,6 +45,6 @@ jobs:
       - name: Publish release APK
         uses: "mathieucarbou/marvinpinto-action-automatic-releases@latest"
         with:
-          repo_token: "${{ secrets.NEKOYUME_PAT_TOKEN }}"
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: ${{ env.APP_NAME }}-release-${{ env.RELEASE_VERSION }}.apk
