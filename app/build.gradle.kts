@@ -4,6 +4,18 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+fun calculateVersionCode(version: String): Int {
+    val clean = version.substringBefore('-').trim()
+    val parts = clean.split('.').map { it.toIntOrNull() ?: 0 }
+    val major = parts.getOrElse(0) { 0 }
+    val minor = parts.getOrElse(1) { 0 }
+    val patch = parts.getOrElse(2) { 0 }
+    return major * 10000 + minor * 100 + patch
+}
+
+val versionFile = rootProject.file("version.txt")
+val appVersion = if (versionFile.exists()) versionFile.readText().trim() else "0.0.1"
+
 android {
     namespace = "com.bl4ckswordsman.nekoyume"
     compileSdk = 35
@@ -12,8 +24,8 @@ android {
         applicationId = "com.bl4ckswordsman.nekoyume"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.0.1"
+        versionCode = calculateVersionCode(appVersion)
+        versionName = appVersion
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
