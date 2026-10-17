@@ -10,10 +10,8 @@ import com.bl4ckswordsman.nekoyume.core.audio.AudioLoopEngine
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,14 +30,26 @@ class NekoyumePlaybackService : MediaSessionService() {
     private var basePlayer: ExoPlayer? = null
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    private var idleTimeoutJob: Job? = null
+    private lateinit var idleTimeoutHandler: ServiceIdleTimeoutHandler
 
     companion object {
-        const val IDLE_TIMEOUT_MS = 15 * 60 * 1000L // 15 minutes
+        const val PREFS_NAME = "nekoyume_playback_prefs"
+        const val KEY_SAVED_MIX = "saved_mix_state"
     }
 
     override fun onCreate() {
         super.onCreate()
+
+        idleTimeoutHandler = ServiceIdleTimeoutHandler(
+            scope = serviceScope,
+            timeoutMs = ServiceIdleTimeoutHandler.DEFAULT_IDLE_TIMEOUT_MS,
+            onTimeout = {
+                if (!audioEngine.mixState.value.isPlaying) {
+                    audioEngine.stopAll()
+                    stopSelf()
+                }
+            }
+        )
 
         val player = ExoPlayer.Builder(this).build()
         basePlayer = player
@@ -58,37 +68,44 @@ class NekoyumePlaybackService : MediaSessionService() {
             .build()
 
         observePlaybackLifecycle()
+        restoreSavedMixIfAvailable()
     }
 
     private fun observePlaybackLifecycle() {
         serviceScope.launch {
             audioEngine.mixState.collect { mixState ->
-                if (mixState.isPlaying) {
-                    cancelIdleTimeout()
-                } else if (mixState.activeTracks.isNotEmpty()) {
-                    startIdleTimeout()
+                idleTimeoutHandler.onPlaybackStateChanged(
+                    isPlaying = mixState.isPlaying,
+                    hasActiveTracks = mixState.hasActiveTracks
+                )
+
+                if (mixState.hasActiveTracks) {
+                    val serialized = ServiceStateRestorer.serialize(mixState)
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                        .edit()
+                        .putString(KEY_SAVED_MIX, serialized)
+                        .apply()
                 } else {
-                    cancelIdleTimeout()
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                        .edit()
+                        .remove(KEY_SAVED_MIX)
+                        .apply()
                     stopSelf()
                 }
             }
         }
     }
 
-    private fun startIdleTimeout() {
-        idleTimeoutJob?.cancel()
-        idleTimeoutJob = serviceScope.launch {
-            delay(IDLE_TIMEOUT_MS)
-            if (!audioEngine.mixState.value.isPlaying) {
-                audioEngine.stopAll()
-                stopSelf()
-            }
-        }
-    }
+    private fun restoreSavedMixIfAvailable() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val saved = prefs.getString(KEY_SAVED_MIX, null) ?: return
+        val restored = ServiceStateRestorer.deserialize(saved) ?: return
 
-    private fun cancelIdleTimeout() {
-        idleTimeoutJob?.cancel()
-        idleTimeoutJob = null
+        // In accordance with FR-014: state restored in paused condition
+        if (restored.hasActiveTracks && !audioEngine.mixState.value.hasActiveTracks) {
+            // Restore saved master volume
+            audioEngine.setMasterVolume(restored.masterVolume)
+        }
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
@@ -96,16 +113,16 @@ class NekoyumePlaybackService : MediaSessionService() {
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
         // FR-013: If audio is actively playing, sustain background playback across task removal.
-        if (audioEngine.mixState.value.isPlaying) {
-            super.onTaskRemoved(rootIntent)
-        } else {
-            stopSelf()
-        }
+        ServiceLifecycleHandler.handleTaskRemoved(
+            isPlaying = audioEngine.mixState.value.isPlaying,
+            onStopService = { stopSelf() }
+        )
     }
 
     override fun onDestroy() {
-        cancelIdleTimeout()
+        idleTimeoutHandler.cancel()
         serviceScope.cancel()
 
         mediaSession?.run {

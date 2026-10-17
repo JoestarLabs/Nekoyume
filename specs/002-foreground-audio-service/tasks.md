@@ -89,15 +89,15 @@
 
 > **NOTE: Write these tests FIRST and ensure they FAIL before implementation.**
 
-- [ ] T020 [P] [US3] Create unit test for 15-minute paused idle timeout auto-shutdown in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/service/ServiceIdleTimeoutTest.kt`
-- [ ] T021 [P] [US3] Create unit test for `onTaskRemoved` retention and process revival state restoration in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/service/ServiceLifecycleRecoveryTest.kt`
+- [X] T020 [P] [US3] Create unit test for 15-minute paused idle timeout auto-shutdown in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/service/ServiceIdleTimeoutTest.kt`
+- [X] T021 [P] [US3] Create unit test for `onTaskRemoved` retention and process revival state restoration in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/service/ServiceLifecycleRecoveryTest.kt`
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Implement 15-minute cancellable coroutine idle timeout upon entering paused state in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt`
-- [ ] T023 [US3] Implement `onTaskRemoved` in `NekoyumePlaybackService.kt` to sustain playing audio and dismiss stopped service (FR-013)
-- [ ] T024 [US3] Implement mix state serialization and paused restoration on process revival in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt` (FR-014)
-- [ ] T025 [US3] Integrate `NekoyumeAudioFocusManager` transient ducking (attenuate to 0.2f volume) and permanent pause handling in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt` (FR-015)
+- [X] T022 [US3] Implement 15-minute cancellable coroutine idle timeout upon entering paused state in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt`
+- [X] T023 [US3] Implement `onTaskRemoved` in `NekoyumePlaybackService.kt` to sustain playing audio and dismiss stopped service (FR-013)
+- [X] T024 [US3] Implement mix state serialization and paused restoration on process revival in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt` (FR-014)
+- [X] T025 [US3] Integrate `NekoyumeAudioFocusManager` transient ducking (attenuate to 0.2f volume) and permanent pause handling in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt` (FR-015)
 
 **Checkpoint**: All user stories complete. Service lifecycle, battery preservation, and audio focus handling fully functional.
 
