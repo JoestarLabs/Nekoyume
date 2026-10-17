@@ -1,7 +1,7 @@
 package com.bl4ckswordsman.nekoyume.core.audio
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -53,7 +53,7 @@ class Media3AudioLoopEngine(
         },
         playerFactory = { _, assetPath ->
             val player = ExoPlayer.Builder(context).build()
-            val uri = Uri.parse("asset:///$assetPath")
+            val uri = "asset:///$assetPath".toUri()
             player.setMediaItem(MediaItem.fromUri(uri))
             player
         }

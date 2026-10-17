@@ -100,9 +100,9 @@
 
 **Purpose**: Quality gate verification, static analysis, and compliance audit.
 
-- [ ] T022 [P] Run and verify complete quickstart test suite per `specs/001-audio-loop-engine/quickstart.md` ensuring all unit tests pass with `./gradlew testDebugUnitTest`
-- [ ] T023 Run static analysis with `./gradlew lintDebug` and resolve any lint warnings or resource issues
-- [ ] T024 Perform codebase architecture and quality audit ensuring strict adherence to Constitution Principle VII (SoC, DRY, pure domain models, KDocs, no resource leaks)
+- [X] T022 [P] Run and verify complete quickstart test suite per `specs/001-audio-loop-engine/quickstart.md` ensuring all unit tests pass with `./gradlew testDebugUnitTest`
+- [X] T023 Run static analysis with `./gradlew lintDebug` and resolve any lint warnings or resource issues
+- [X] T024 Perform codebase architecture and quality audit ensuring strict adherence to Constitution Principle VII (SoC, DRY, pure domain models, KDocs, no resource leaks)
 
 ---
 

@@ -7,7 +7,6 @@ import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.os.Build
 import androidx.core.content.ContextCompat
 import com.bl4ckswordsman.nekoyume.core.audio.model.AudioFocusState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,28 +56,19 @@ class NekoyumeAudioFocusManager(
         registerNoisyReceiver()
         val am = audioManager ?: return true
 
-        val granted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val playbackAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .build()
+        val playbackAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
 
-            val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(playbackAttributes)
-                .setAcceptsDelayedFocusGain(false)
-                .setOnAudioFocusChangeListener(this)
-                .build()
+        val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(playbackAttributes)
+            .setAcceptsDelayedFocusGain(false)
+            .setOnAudioFocusChangeListener(this)
+            .build()
 
-            focusRequest = request
-            am.requestAudioFocus(request) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-        } else {
-            @Suppress("DEPRECATION")
-            am.requestAudioFocus(
-                this,
-                AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN
-            ) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-        }
+        focusRequest = request
+        val granted = am.requestAudioFocus(request) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
 
         if (granted) {
             _focusState.value = AudioFocusState.ACQUIRED
@@ -94,13 +84,8 @@ class NekoyumeAudioFocusManager(
         unregisterNoisyReceiver()
         val am = audioManager ?: return
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            focusRequest?.let { am.abandonAudioFocusRequest(it) }
-            focusRequest = null
-        } else {
-            @Suppress("DEPRECATION")
-            am.abandonAudioFocus(this)
-        }
+        focusRequest?.let { am.abandonAudioFocusRequest(it) }
+        focusRequest = null
         _focusState.value = AudioFocusState.NONE
     }
 
