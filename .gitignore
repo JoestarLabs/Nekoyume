@@ -1,13 +1,30 @@
 *.iml
 .gradle
 /local.properties
-/.idea/*
+local.properties
+.idea/
 .DS_Store
+Thumbs.db
+*.log
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+ndkBuild/
 
-# Project exclude paths
-# /gradle/
+# Built artifacts
+*.apk
+*.aar
+*.aab
+*.ap_
+
+# Kotlin compiler files
+.kotlin/
+*.kotlin_module
+
+# Keystore and signing files
+*.keystore
+*.jks
+*.keystore.b64
+*.jks.b64
+

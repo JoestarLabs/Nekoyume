@@ -13,8 +13,9 @@ fun calculateVersionCode(version: String): Int {
     return major * 10000 + minor * 100 + patch
 }
 
-val versionFile = rootProject.file("version.txt")
-val appVersion = if (versionFile.exists()) versionFile.readText().trim() else "0.0.1"
+val appVersion = providers.fileContents(
+    rootProject.layout.projectDirectory.file("version.txt")
+).asText.map { it.trim() }.orElse("0.0.1").get()
 
 android {
     namespace = "com.bl4ckswordsman.nekoyume"
@@ -33,19 +34,32 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
         debug { applicationIdSuffix = ".debug" }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "11" }
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
 }
 
 dependencies {

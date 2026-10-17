@@ -3,23 +3,73 @@
   "extends": [
     "config:recommended"
   ],
+  "dependencyDashboard": true,
+  "labels": [
+    "dependencies"
+  ],
   "schedule": [
     "before 5am on wednesday and friday"
   ],
   "packageRules": [
     {
-      "matchManagers": [
-        "gradle"
-      ],
-      "groupName": "gradle dependencies",
-      "groupSlug": "gradle-dependencies"
+      "description": "Group Kotlin, Coroutines, and Compose compiler together so compiler and runtime versions stay in lockstep",
+      "groupName": "Kotlin & KSP",
+      "groupSlug": "kotlin-ksp",
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.kotlin/",
+        "/^org\\.jetbrains\\.kotlinx/",
+        "/^com\\.google\\.devtools\\.ksp/"
+      ]
     },
     {
+      "description": "Group AndroidX and Compose ecosystem dependencies",
+      "groupName": "AndroidX & Compose",
+      "groupSlug": "androidx-compose",
+      "matchPackageNames": [
+        "/^androidx\\./"
+      ]
+    },
+    {
+      "description": "Group Android Gradle Plugin with Gradle Wrapper so build tools remain compatible",
+      "groupName": "Build Tooling & Gradle",
+      "groupSlug": "build-tooling",
+      "matchPackageNames": [
+        "/^com\\.android\\./"
+      ]
+    },
+    {
+      "description": "Group Gradle Wrapper with Build Tooling",
+      "groupName": "Build Tooling & Gradle",
+      "groupSlug": "build-tooling",
+      "matchManagers": [
+        "gradle-wrapper"
+      ]
+    },
+    {
+      "description": "Group Test framework dependencies",
+      "groupName": "Testing dependencies",
+      "groupSlug": "test-dependencies",
+      "matchPackageNames": [
+        "junit:junit",
+        "/^androidx\\.test/",
+        "/^org\\.mockito/",
+        "/^org\\.robolectric/"
+      ]
+    },
+    {
+      "description": "Group GitHub Actions workflow updates",
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions",
       "matchManagers": [
         "github-actions"
+      ]
+    },
+    {
+      "description": "Do not automatically bump Java runtime versions in GitHub Actions workflows to prevent breaking Android SDK/AGP compatibility",
+      "matchDatasources": [
+        "java-version"
       ],
-      "groupName": "github action dependencies",
-      "groupSlug": "github-action-dependencies"
+      "enabled": false
     }
   ]
 }
