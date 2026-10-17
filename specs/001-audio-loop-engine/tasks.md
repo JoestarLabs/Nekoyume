@@ -11,9 +11,9 @@
 
 **Purpose**: Project initialization, Media3 dependency configuration, and asset catalog setup.
 
-- [ ] T001 Add AndroidX Media3 ExoPlayer (`androidx.media3:media3-exoplayer:1.5.1`) dependency to `gradle/libs.versions.toml` and `app/build.gradle.kts`
-- [ ] T002 [P] Create package directory structure for core audio engine under `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/` (`model/`, `repository/`, `focus/`, `ramp/`)
-- [ ] T003 [P] Create sample ambient audio asset files (`rain.ogg`, `forest.ogg`, `white_noise.ogg`) in `app/src/main/assets/sounds/` and bundled `sounds.json` catalog manifest adhering to `specs/001-audio-loop-engine/contracts/manifest-schema.json`
+- [X] T001 Add AndroidX Media3 ExoPlayer (`androidx.media3:media3-exoplayer:1.5.1`) dependency to `gradle/libs.versions.toml` and `app/build.gradle.kts`
+- [X] T002 [P] Create package directory structure for core audio engine under `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/` (`model/`, `repository/`, `focus/`, `ramp/`)
+- [X] T003 [P] Create sample ambient audio asset files (`rain.ogg`, `forest.ogg`, `white_noise.ogg`) in `app/src/main/assets/sounds/` and bundled `sounds.json` catalog manifest adhering to `specs/001-audio-loop-engine/contracts/manifest-schema.json`
 
 ---
 
