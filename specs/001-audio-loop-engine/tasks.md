@@ -11,9 +11,9 @@
 
 **Purpose**: Project initialization, Media3 dependency configuration, and asset catalog setup.
 
-- [ ] T001 Add AndroidX Media3 ExoPlayer (`androidx.media3:media3-exoplayer:1.5.1`) dependency to `gradle/libs.versions.toml` and `app/build.gradle.kts`
-- [ ] T002 [P] Create package directory structure for core audio engine under `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/` (`model/`, `repository/`, `focus/`, `ramp/`)
-- [ ] T003 [P] Create sample ambient audio asset files (`rain.ogg`, `forest.ogg`, `white_noise.ogg`) in `app/src/main/assets/sounds/` and bundled `sounds.json` catalog manifest adhering to `specs/001-audio-loop-engine/contracts/manifest-schema.json`
+- [X] T001 Add AndroidX Media3 ExoPlayer (`androidx.media3:media3-exoplayer:1.5.1`) dependency to `gradle/libs.versions.toml` and `app/build.gradle.kts`
+- [X] T002 [P] Create package directory structure for core audio engine under `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/` (`model/`, `repository/`, `focus/`, `ramp/`)
+- [X] T003 [P] Create sample ambient audio asset files (`rain.ogg`, `forest.ogg`, `white_noise.ogg`) in `app/src/main/assets/sounds/` and bundled `sounds.json` catalog manifest adhering to `specs/001-audio-loop-engine/contracts/manifest-schema.json`
 
 ---
 
@@ -23,12 +23,12 @@
 
 **⚠️ CRITICAL**: Must complete before user story playback engine implementation can begin.
 
-- [ ] T004 [P] Implement pure domain models `SoundCategory` enum (NATURE, WEATHER, AMBIENCE, NOISE, SLEEP) and `SoundTrack` data class ("id: String", "name: String", "category: SoundCategory", "assetPath: String", "defaultVolume: Float in [0.0, 1.0]") in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/model/SoundTrack.kt`
-- [ ] T005 [P] Implement runtime state models `TrackPlaybackStatus` enum (IDLE, LOADING, PLAYING, PAUSED, ERROR), `TrackPlaybackState` data class ("volume: Float in [0.0, 1.0]", "status", "isMuted: Boolean", "errorMessage: String?"), and `AudioFocusState` enum in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/model/TrackPlaybackState.kt`
-- [ ] T006 [P] Implement aggregate mix model `AudioMixState` ("masterVolume: Float in [0.0, 1.0]", "max 8 activeTracks", "isMasterPaused: Boolean", "audioFocusState: AudioFocusState") in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/model/AudioMixState.kt`
-- [ ] T007 [P] Define `SoundCatalogRepository` contract interface per `specs/001-audio-loop-engine/contracts/catalog-repository-contract.md` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/repository/SoundCatalogRepository.kt`
-- [ ] T008 Create unit test `AssetSoundCatalogRepositoryTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/repository/AssetSoundCatalogRepositoryTest.kt` verifying manifest deserialization, caching, category filtering, and graceful error handling for missing/malformed JSON
-- [ ] T009 Implement `AssetSoundCatalogRepository` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/repository/AssetSoundCatalogRepository.kt` loading and parsing `assets/sounds/sounds.json` via Android `AssetManager`, ensuring 100% pass on `AssetSoundCatalogRepositoryTest`
+- [X] T004 [P] Implement pure domain models `SoundCategory` enum (NATURE, WEATHER, AMBIENCE, NOISE, SLEEP) and `SoundTrack` data class ("id: String", "name: String", "category: SoundCategory", "assetPath: String", "defaultVolume: Float in [0.0, 1.0]") in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/model/SoundTrack.kt`
+- [X] T005 [P] Implement runtime state models `TrackPlaybackStatus` enum (IDLE, LOADING, PLAYING, PAUSED, ERROR), `TrackPlaybackState` data class ("volume: Float in [0.0, 1.0]", "status", "isMuted: Boolean", "errorMessage: String?"), and `AudioFocusState` enum in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/model/TrackPlaybackState.kt`
+- [X] T006 [P] Implement aggregate mix model `AudioMixState` ("masterVolume: Float in [0.0, 1.0]", "max 8 activeTracks", "isMasterPaused: Boolean", "audioFocusState: AudioFocusState") in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/model/AudioMixState.kt`
+- [X] T007 [P] Define `SoundCatalogRepository` contract interface per `specs/001-audio-loop-engine/contracts/catalog-repository-contract.md` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/repository/SoundCatalogRepository.kt`
+- [X] T008 Create unit test `AssetSoundCatalogRepositoryTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/repository/AssetSoundCatalogRepositoryTest.kt` verifying manifest deserialization, caching, category filtering, and graceful error handling for missing/malformed JSON
+- [X] T009 Implement `AssetSoundCatalogRepository` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/repository/AssetSoundCatalogRepository.kt` loading and parsing `assets/sounds/sounds.json` via Android `AssetManager`, ensuring 100% pass on `AssetSoundCatalogRepositoryTest`
 
 **Checkpoint**: Foundation ready — domain models and catalog data source validated. Playback engine implementation can begin.
 
@@ -44,14 +44,14 @@
 
 > **Write these tests FIRST and verify they fail before implementing the engine.**
 
-- [ ] T010 [US1] Define `AudioLoopEngine` public interface per `specs/001-audio-loop-engine/contracts/audio-engine-contract.md` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngine.kt` exposing `mixState: StateFlow<AudioMixState>`, `startTrack()`, `stopTrack()`, `pauseAll()`, `resumeAll()`, `stopAll()`, `getTrackState()`, and `release()`
-- [ ] T011 [P] [US1] Create unit test `AudioLoopEngineConcurrencyTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngineConcurrencyTest.kt` validating parallel stream playback up to 8 streams, state flow emission, and rejection of 9th stream with `MaxTracksExceededException`
-- [ ] T012 [P] [US1] Create unit test `AudioLoopEngineLoopingTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngineLoopingTest.kt` asserting that `ExoPlayer` instances are configured with `REPEAT_MODE_ONE`, sample-accurate gapless repetition, and 30ms micro-crossfade envelope
+- [X] T010 [US1] Define `AudioLoopEngine` public interface per `specs/001-audio-loop-engine/contracts/audio-engine-contract.md` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngine.kt` exposing `mixState: StateFlow<AudioMixState>`, `startTrack()`, `stopTrack()`, `pauseAll()`, `resumeAll()`, `stopAll()`, `getTrackState()`, and `release()`
+- [X] T011 [P] [US1] Create unit test `AudioLoopEngineConcurrencyTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngineConcurrencyTest.kt` validating parallel stream playback up to 8 streams, state flow emission, and rejection of 9th stream with `MaxTracksExceededException`
+- [X] T012 [P] [US1] Create unit test `AudioLoopEngineLoopingTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngineLoopingTest.kt` asserting that `ExoPlayer` instances are configured with `REPEAT_MODE_ONE`, sample-accurate gapless repetition, and 30ms micro-crossfade envelope
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Implement `Media3AudioLoopEngine` player pool manager in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/Media3AudioLoopEngine.kt` managing a concurrent pool of up to 8 `ExoPlayer` instances with `REPEAT_MODE_ONE`, asset URI resolution (`asset:///sounds/...`), and reactive `AudioMixState` updates
-- [ ] T014 [US1] Implement playback controls (`stopTrack`, `pauseAll`, `resumeAll`, `stopAll`, `release`) in `Media3AudioLoopEngine.kt` ensuring that all underlying `ExoPlayer` instances and hardware buffers are explicitly released when stopped or torn down per Constitution Principle VII
+- [X] T013 [US1] Implement `Media3AudioLoopEngine` player pool manager in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/Media3AudioLoopEngine.kt` managing a concurrent pool of up to 8 `ExoPlayer` instances with `REPEAT_MODE_ONE`, asset URI resolution (`asset:///sounds/...`), and reactive `AudioMixState` updates
+- [X] T014 [US1] Implement playback controls (`stopTrack`, `pauseAll`, `resumeAll`, `stopAll`, `release`) in `Media3AudioLoopEngine.kt` ensuring that all underlying `ExoPlayer` instances and hardware buffers are explicitly released when stopped or torn down per Constitution Principle VII
 
 **Checkpoint**: User Story 1 is fully functional and testable headlessly. MVP playback and gapless looping achieved!
 
@@ -65,13 +65,13 @@
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T015 [P] [US2] Create unit test `VolumeRampHandlerTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/VolumeRampHandlerTest.kt` validating 30ms interpolation over 6 discrete steps (5ms intervals), cancellation of prior in-flight ramps on rapid scrubbing, and mathematical gain precision
-- [ ] T016 [P] [US2] Create unit test `AudioMixerVolumeScalingTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioMixerVolumeScalingTest.kt` asserting that effective hardware gain formula $G_i = V_i \times V_{\text{master}}$ correctly scales individual track volumes when master or track levels are modified
+- [X] T015 [P] [US2] Create unit test `VolumeRampHandlerTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/VolumeRampHandlerTest.kt` validating 30ms interpolation over 6 discrete steps (5ms intervals), cancellation of prior in-flight ramps on rapid scrubbing, and mathematical gain precision
+- [X] T016 [P] [US2] Create unit test `AudioMixerVolumeScalingTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioMixerVolumeScalingTest.kt` asserting that effective hardware gain formula $G_i = V_i \times V_{\text{master}}$ correctly scales individual track volumes when master or track levels are modified
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Implement `VolumeRampHandler` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/ramp/VolumeRampHandler.kt` performing asynchronous coroutine volume interpolation over 30ms with automatic cancellation of superseded ramp jobs
-- [ ] T018 [US2] Integrate `VolumeRampHandler` into `Media3AudioLoopEngine.kt` for `setTrackVolume()`, `setTrackMuted()`, and `setMasterVolume()`, recalculating and smoothing hardware gain across all active tracks
+- [X] T017 [US2] Implement `VolumeRampHandler` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/ramp/VolumeRampHandler.kt` performing asynchronous coroutine volume interpolation over 30ms with automatic cancellation of superseded ramp jobs
+- [X] T018 [US2] Integrate `VolumeRampHandler` into `Media3AudioLoopEngine.kt` for `setTrackVolume()`, `setTrackMuted()`, and `setMasterVolume()`, recalculating and smoothing hardware gain across all active tracks
 
 **Checkpoint**: User Stories 1 and 2 work seamlessly together. Concurrent looping with smooth anti-zipper volume attenuation verified.
 
@@ -85,12 +85,12 @@
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T019 [P] [US3] Create unit test `AudioFocusManagerTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioFocusManagerTest.kt` verifying state transitions and duck multiplier ($D = 0.3f$) on `AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK`, pause on `AUDIOFOCUS_LOSS`, and recovery on `AUDIOFOCUS_GAIN`
+- [X] T019 [P] [US3] Create unit test `AudioFocusManagerTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioFocusManagerTest.kt` verifying state transitions and duck multiplier ($D = 0.3f$) on `AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK`, pause on `AUDIOFOCUS_LOSS`, and recovery on `AUDIOFOCUS_GAIN`
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Implement `NekoyumeAudioFocusManager` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/focus/NekoyumeAudioFocusManager.kt` using `AudioManager` / `AudioFocusRequestCompat` with `USAGE_MEDIA` and `CONTENT_TYPE_MUSIC`, plus `BroadcastReceiver` for `ACTION_AUDIO_BECOMING_NOISY`
-- [ ] T021 [US3] Wire `NekoyumeAudioFocusManager` into `Media3AudioLoopEngine.kt` to apply the 70% ducking multiplier ($D = 0.3f$) via `VolumeRampHandler` on transient focus loss and trigger `pauseAll()` on permanent loss or noisy disconnection
+- [X] T020 [US3] Implement `NekoyumeAudioFocusManager` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/focus/NekoyumeAudioFocusManager.kt` using `AudioManager` / `AudioFocusRequestCompat` with `USAGE_MEDIA` and `CONTENT_TYPE_MUSIC`, plus `BroadcastReceiver` for `ACTION_AUDIO_BECOMING_NOISY`
+- [X] T021 [US3] Wire `NekoyumeAudioFocusManager` into `Media3AudioLoopEngine.kt` to apply the 70% ducking multiplier ($D = 0.3f$) via `VolumeRampHandler` on transient focus loss and trigger `pauseAll()` on permanent loss or noisy disconnection
 
 **Checkpoint**: All three user stories are complete, integrated, and verified against platform lifecycle events!
 
@@ -100,9 +100,9 @@
 
 **Purpose**: Quality gate verification, static analysis, and compliance audit.
 
-- [ ] T022 [P] Run and verify complete quickstart test suite per `specs/001-audio-loop-engine/quickstart.md` ensuring all unit tests pass with `./gradlew testDebugUnitTest`
-- [ ] T023 Run static analysis with `./gradlew lintDebug` and resolve any lint warnings or resource issues
-- [ ] T024 Perform codebase architecture and quality audit ensuring strict adherence to Constitution Principle VII (SoC, DRY, pure domain models, KDocs, no resource leaks)
+- [X] T022 [P] Run and verify complete quickstart test suite per `specs/001-audio-loop-engine/quickstart.md` ensuring all unit tests pass with `./gradlew testDebugUnitTest`
+- [X] T023 Run static analysis with `./gradlew lintDebug` and resolve any lint warnings or resource issues
+- [X] T024 Perform codebase architecture and quality audit ensuring strict adherence to Constitution Principle VII (SoC, DRY, pure domain models, KDocs, no resource leaks)
 
 ---
 

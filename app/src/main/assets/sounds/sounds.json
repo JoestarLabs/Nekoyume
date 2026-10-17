@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "sounds": [
+    {
+      "id": "rain",
+      "name": "Gentle Rain",
+      "category": "WEATHER",
+      "assetPath": "sounds/rain.ogg",
+      "defaultVolume": 0.7
+    },
+    {
+      "id": "forest",
+      "name": "Forest Ambience",
+      "category": "NATURE",
+      "assetPath": "sounds/forest.ogg",
+      "defaultVolume": 0.6
+    },
+    {
+      "id": "white_noise",
+      "name": "Classic White Noise",
+      "category": "NOISE",
+      "assetPath": "sounds/white_noise.ogg",
+      "defaultVolume": 0.5
+    }
+  ]
+}
