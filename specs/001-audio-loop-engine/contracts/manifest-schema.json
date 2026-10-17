@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NekoyumeSoundCatalogManifest",
+  "description": "Schema definition for Nekoyume packaged sound assets manifest (sounds.json)",
+  "type": "object",
+  "required": ["version", "sounds"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Schema version indicator"
+    },
+    "sounds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "category", "assetPath"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_-]+$",
+            "description": "Unique slug identifier for the sound track"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Human-readable display title"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["NATURE", "WEATHER", "AMBIENCE", "NOISE", "SLEEP"],
+            "description": "Ambient category group"
+          },
+          "assetPath": {
+            "type": "string",
+            "pattern": "^sounds/[a-zA-Z0-9_-]+\\.(ogg|opus|mp3|wav)$",
+            "description": "Path relative to assets directory"
+          },
+          "defaultVolume": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "default": 0.7,
+            "description": "Recommended default volume multiplier"
+          }
+        }
+      }
+    }
+  }
+}
