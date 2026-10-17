@@ -55,6 +55,7 @@ class Media3AudioLoopEngine(
 
     private val mutex = Mutex()
     private val players = ConcurrentHashMap<String, Player>()
+    private val rampHandler = com.bl4ckswordsman.nekoyume.core.audio.ramp.VolumeRampHandler(scope, dispatcher)
 
     private val _mixState = MutableStateFlow(AudioMixState())
     override val mixState: StateFlow<AudioMixState> = _mixState.asStateFlow()
@@ -229,6 +230,7 @@ class Media3AudioLoopEngine(
     }
 
     override fun release() {
+        rampHandler.cancelAll()
         stopAll()
     }
 
@@ -250,11 +252,13 @@ class Media3AudioLoopEngine(
     private fun applyTrackHardwareVolume(soundId: String) {
         val player = players[soundId] ?: return
         val track = _mixState.value.activeTracks[soundId] ?: return
-        if (track.isMuted) {
-            player.volume = 0.0f
-        } else {
-            player.volume = calculateEffectiveVolume(track.volume)
-        }
+        val targetVolume = if (track.isMuted) 0.0f else calculateEffectiveVolume(track.volume)
+        rampHandler.rampVolume(
+            targetId = soundId,
+            fromVolume = player.volume,
+            toVolume = targetVolume,
+            onVolumeStep = { player.volume = it }
+        )
     }
 
     private fun releasePlayer(player: Player) {

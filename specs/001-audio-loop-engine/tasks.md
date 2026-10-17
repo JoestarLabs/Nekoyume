@@ -65,13 +65,13 @@
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T015 [P] [US2] Create unit test `VolumeRampHandlerTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/VolumeRampHandlerTest.kt` validating 30ms interpolation over 6 discrete steps (5ms intervals), cancellation of prior in-flight ramps on rapid scrubbing, and mathematical gain precision
-- [ ] T016 [P] [US2] Create unit test `AudioMixerVolumeScalingTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioMixerVolumeScalingTest.kt` asserting that effective hardware gain formula $G_i = V_i \times V_{\text{master}}$ correctly scales individual track volumes when master or track levels are modified
+- [X] T015 [P] [US2] Create unit test `VolumeRampHandlerTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/VolumeRampHandlerTest.kt` validating 30ms interpolation over 6 discrete steps (5ms intervals), cancellation of prior in-flight ramps on rapid scrubbing, and mathematical gain precision
+- [X] T016 [P] [US2] Create unit test `AudioMixerVolumeScalingTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioMixerVolumeScalingTest.kt` asserting that effective hardware gain formula $G_i = V_i \times V_{\text{master}}$ correctly scales individual track volumes when master or track levels are modified
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Implement `VolumeRampHandler` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/ramp/VolumeRampHandler.kt` performing asynchronous coroutine volume interpolation over 30ms with automatic cancellation of superseded ramp jobs
-- [ ] T018 [US2] Integrate `VolumeRampHandler` into `Media3AudioLoopEngine.kt` for `setTrackVolume()`, `setTrackMuted()`, and `setMasterVolume()`, recalculating and smoothing hardware gain across all active tracks
+- [X] T017 [US2] Implement `VolumeRampHandler` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/ramp/VolumeRampHandler.kt` performing asynchronous coroutine volume interpolation over 30ms with automatic cancellation of superseded ramp jobs
+- [X] T018 [US2] Integrate `VolumeRampHandler` into `Media3AudioLoopEngine.kt` for `setTrackVolume()`, `setTrackMuted()`, and `setMasterVolume()`, recalculating and smoothing hardware gain across all active tracks
 
 **Checkpoint**: User Stories 1 and 2 work seamlessly together. Concurrent looping with smooth anti-zipper volume attenuation verified.
 
