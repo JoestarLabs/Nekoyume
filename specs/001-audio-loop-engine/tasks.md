@@ -44,14 +44,14 @@
 
 > **Write these tests FIRST and verify they fail before implementing the engine.**
 
-- [ ] T010 [US1] Define `AudioLoopEngine` public interface per `specs/001-audio-loop-engine/contracts/audio-engine-contract.md` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngine.kt` exposing `mixState: StateFlow<AudioMixState>`, `startTrack()`, `stopTrack()`, `pauseAll()`, `resumeAll()`, `stopAll()`, `getTrackState()`, and `release()`
-- [ ] T011 [P] [US1] Create unit test `AudioLoopEngineConcurrencyTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngineConcurrencyTest.kt` validating parallel stream playback up to 8 streams, state flow emission, and rejection of 9th stream with `MaxTracksExceededException`
-- [ ] T012 [P] [US1] Create unit test `AudioLoopEngineLoopingTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngineLoopingTest.kt` asserting that `ExoPlayer` instances are configured with `REPEAT_MODE_ONE`, sample-accurate gapless repetition, and 30ms micro-crossfade envelope
+- [X] T010 [US1] Define `AudioLoopEngine` public interface per `specs/001-audio-loop-engine/contracts/audio-engine-contract.md` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngine.kt` exposing `mixState: StateFlow<AudioMixState>`, `startTrack()`, `stopTrack()`, `pauseAll()`, `resumeAll()`, `stopAll()`, `getTrackState()`, and `release()`
+- [X] T011 [P] [US1] Create unit test `AudioLoopEngineConcurrencyTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngineConcurrencyTest.kt` validating parallel stream playback up to 8 streams, state flow emission, and rejection of 9th stream with `MaxTracksExceededException`
+- [X] T012 [P] [US1] Create unit test `AudioLoopEngineLoopingTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioLoopEngineLoopingTest.kt` asserting that `ExoPlayer` instances are configured with `REPEAT_MODE_ONE`, sample-accurate gapless repetition, and 30ms micro-crossfade envelope
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Implement `Media3AudioLoopEngine` player pool manager in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/Media3AudioLoopEngine.kt` managing a concurrent pool of up to 8 `ExoPlayer` instances with `REPEAT_MODE_ONE`, asset URI resolution (`asset:///sounds/...`), and reactive `AudioMixState` updates
-- [ ] T014 [US1] Implement playback controls (`stopTrack`, `pauseAll`, `resumeAll`, `stopAll`, `release`) in `Media3AudioLoopEngine.kt` ensuring that all underlying `ExoPlayer` instances and hardware buffers are explicitly released when stopped or torn down per Constitution Principle VII
+- [X] T013 [US1] Implement `Media3AudioLoopEngine` player pool manager in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/Media3AudioLoopEngine.kt` managing a concurrent pool of up to 8 `ExoPlayer` instances with `REPEAT_MODE_ONE`, asset URI resolution (`asset:///sounds/...`), and reactive `AudioMixState` updates
+- [X] T014 [US1] Implement playback controls (`stopTrack`, `pauseAll`, `resumeAll`, `stopAll`, `release`) in `Media3AudioLoopEngine.kt` ensuring that all underlying `ExoPlayer` instances and hardware buffers are explicitly released when stopped or torn down per Constitution Principle VII
 
 **Checkpoint**: User Story 1 is fully functional and testable headlessly. MVP playback and gapless looping achieved!
 
