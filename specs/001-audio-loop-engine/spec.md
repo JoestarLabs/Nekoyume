@@ -114,7 +114,7 @@ As a mobile user, I want the white noise playback to respond sensibly when exter
 
 ## Assumptions
 
-- Audio assets are stored locally within the application package (`assets/` or `res/raw/`) for this core phase; remote streaming is out of scope.
+- Audio assets are stored locally within the application package (`assets/sounds/`) and registered via `sounds.json` for this core phase; remote streaming is out of scope.
 - Platform target is modern Android (SDK 29+ minimum, compiled against modern SDK 37 standards).
 - Visual UI components (Expressive buttons, squiggly sliders) will consume this engine in Feature 002; this feature delivers the verified headless audio engine and mixer API.
 - Up to 8 concurrent tracks is sufficient to cover realistic ambient sound mixing (e.g., rain + wind + fire + river + night crickets).
