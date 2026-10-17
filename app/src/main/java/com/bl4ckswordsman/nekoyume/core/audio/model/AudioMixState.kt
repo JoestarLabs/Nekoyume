@@ -36,6 +36,12 @@ data class AudioMixState(
     val hasActiveTracks: Boolean
         get() = activeTracks.isNotEmpty()
 
+    /**
+     * True if the overall mixer is not paused and at least one track is actively playing.
+     */
+    val isPlaying: Boolean
+        get() = !isMasterPaused && playingTrackCount > 0
+
     companion object {
         /**
          * Hard ceiling for simultaneous active audio streams.

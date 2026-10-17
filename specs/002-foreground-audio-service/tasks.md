@@ -10,9 +10,9 @@
 
 **Purpose**: Configure build dependencies, plugins, and platform manifest permissions for AndroidX Media3 Session and Google Hilt.
 
-- [ ] T001 Add Media3 Session and Hilt dependencies to `gradle/libs.versions.toml`
-- [ ] T002 [P] Configure Hilt and Media3 plugins and dependencies in `build.gradle.kts` and `app/build.gradle.kts`
-- [ ] T003 [P] Declare foreground service, wake lock, and notification permissions in `app/src/main/AndroidManifest.xml`
+- [X] T001 Add Media3 Session and Hilt dependencies to `gradle/libs.versions.toml`
+- [X] T002 [P] Configure Hilt and Media3 plugins and dependencies in `build.gradle.kts` and `app/build.gradle.kts`
+- [X] T003 [P] Declare foreground service, wake lock, and notification permissions in `app/src/main/AndroidManifest.xml`
 
 ---
 
@@ -22,10 +22,10 @@
 
 **⚠️ CRITICAL**: Must complete before any user story implementation can begin.
 
-- [ ] T004 Annotate NekoyumeApplication with `@HiltAndroidApp` in `app/src/main/java/com/bl4ckswordsman/nekoyume/NekoyumeApplication.kt`
-- [ ] T005 [P] Create `ServiceState` and `ServicePlaybackState` data models with `isForeground` invariant and paused timestamp rules in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/ServiceState.kt`
-- [ ] T006 [P] Create `AudioModule` with `SingletonComponent` bindings for `SoundCatalogRepository`, `NekoyumeAudioFocusManager`, and `AudioLoopEngine` in `app/src/main/java/com/bl4ckswordsman/nekoyume/di/AudioModule.kt`
-- [ ] T007 [P] Create unit tests for `AudioModule` DI graph resolution in `app/src/test/java/com/bl4ckswordsman/nekoyume/di/AudioModuleTest.kt`
+- [X] T004 Annotate NekoyumeApplication with `@HiltAndroidApp` in `app/src/main/java/com/bl4ckswordsman/nekoyume/NekoyumeApplication.kt`
+- [X] T005 [P] Create `ServiceState` and `ServicePlaybackState` data models with `isForeground` invariant and paused timestamp rules in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/ServiceState.kt`
+- [X] T006 [P] Create `AudioModule` with `SingletonComponent` bindings for `SoundCatalogRepository`, `NekoyumeAudioFocusManager`, and `AudioLoopEngine` in `app/src/main/java/com/bl4ckswordsman/nekoyume/di/AudioModule.kt`
+- [X] T007 [P] Create unit tests for `AudioModule` DI graph resolution in `app/src/test/java/com/bl4ckswordsman/nekoyume/di/AudioModuleTest.kt`
 
 **Checkpoint**: Core DI foundation and shared models ready. User story implementation can now begin.
 
@@ -41,16 +41,16 @@
 
 > **NOTE: Write these tests FIRST and ensure they FAIL before implementation.**
 
-- [ ] T008 [P] [US1] Create unit test for service foreground promotion and lifecycle transitions in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackServiceTest.kt`
+- [X] T008 [P] [US1] Create unit test for service foreground promotion and lifecycle transitions in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackServiceTest.kt`
 
 ### Implementation for User Story 1
 
-- [ ] T009 [P] [US1] Implement `MultiStreamPlayerAdapter` bridging `AudioLoopEngine` to Media3 `Player` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/MultiStreamPlayerAdapter.kt`
-- [ ] T010 [US1] Implement `NekoyumePlaybackService` extending `MediaSessionService` annotated with `@AndroidEntryPoint`, wiring `MultiStreamPlayerAdapter` to `MediaSession` with foreground promotion on play in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt`
-- [ ] T011 [US1] Register `NekoyumePlaybackService` with `android:foregroundServiceType="mediaPlayback"` in `app/src/main/AndroidManifest.xml`
-- [ ] T012 [P] [US1] Define `PlaybackServiceController` interface in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/PlaybackServiceController.kt`
-- [ ] T013 [US1] Implement `PlaybackServiceControllerImpl` mediating between UI clients and the background service in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/PlaybackServiceControllerImpl.kt`
-- [ ] T014 [US1] Provide `@Singleton` `PlaybackServiceController` binding in `app/src/main/java/com/bl4ckswordsman/nekoyume/di/AudioModule.kt`
+- [X] T009 [P] [US1] Implement `MultiStreamPlayerAdapter` bridging `AudioLoopEngine` to Media3 `Player` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/MultiStreamPlayerAdapter.kt`
+- [X] T010 [US1] Implement `NekoyumePlaybackService` extending `MediaSessionService` annotated with `@AndroidEntryPoint`, wiring `MultiStreamPlayerAdapter` to `MediaSession` with foreground promotion on play in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt`
+- [X] T011 [US1] Register `NekoyumePlaybackService` with `android:foregroundServiceType="mediaPlayback"` in `app/src/main/AndroidManifest.xml`
+- [X] T012 [P] [US1] Define `PlaybackServiceController` interface in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/PlaybackServiceController.kt`
+- [X] T013 [US1] Implement `PlaybackServiceControllerImpl` mediating between UI clients and the background service in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/PlaybackServiceControllerImpl.kt`
+- [X] T014 [US1] Provide `@Singleton` `PlaybackServiceController` binding in `app/src/main/java/com/bl4ckswordsman/nekoyume/di/AudioModule.kt`
 
 **Checkpoint**: User Story 1 complete (MVP). Multi-stream playback runs continuously in the background with foreground service execution.
 
