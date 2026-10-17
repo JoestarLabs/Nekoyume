@@ -36,7 +36,7 @@ class PlaybackServiceControllerImpl @Inject constructor(
     init {
         scope.launch {
             audioEngine.mixState.collect { mix ->
-                val activeCount = mix.playingTrackCount
+                val activeCount = mix.activeTracks.size
                 val current = _serviceState.value
 
                 val newState = when {

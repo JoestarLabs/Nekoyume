@@ -36,4 +36,7 @@ data class ServiceState(
             require(pausedTimestampEpochMs == null) { "pausedTimestampEpochMs must be null when state is not PAUSED" }
         }
     }
+
+    val isPlaying: Boolean
+        get() = playbackState == ServicePlaybackState.PLAYING
 }
