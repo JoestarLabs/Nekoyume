@@ -46,7 +46,7 @@
 ### Implementation for User Story 1
 
 - [ ] T009 [P] [US1] Implement `MultiStreamPlayerAdapter` bridging `AudioLoopEngine` to Media3 `Player` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/MultiStreamPlayerAdapter.kt`
-- [ ] T010 [US1] Implement `NekoyumePlaybackService` extending `MediaSessionService` annotated with `@AndroidEntryPoint` with foreground promotion on play in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt`
+- [ ] T010 [US1] Implement `NekoyumePlaybackService` extending `MediaSessionService` annotated with `@AndroidEntryPoint`, wiring `MultiStreamPlayerAdapter` to `MediaSession` with foreground promotion on play in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt`
 - [ ] T011 [US1] Register `NekoyumePlaybackService` with `android:foregroundServiceType="mediaPlayback"` in `app/src/main/AndroidManifest.xml`
 - [ ] T012 [P] [US1] Define `PlaybackServiceController` interface in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/PlaybackServiceController.kt`
 - [ ] T013 [US1] Implement `PlaybackServiceControllerImpl` mediating between UI clients and the background service in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/PlaybackServiceControllerImpl.kt`
@@ -73,7 +73,7 @@
 
 - [ ] T017 [US2] Implement active soundscape metadata formatting ("Playing X sounds") and media notification configuration in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt`
 - [ ] T018 [US2] Configure notification click intent targeting `MainActivity` with `FLAG_ACTIVITY_SINGLE_TOP` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/service/NekoyumePlaybackService.kt`
-- [ ] T019 [US2] Annotate `MainActivity` with `@AndroidEntryPoint` and connect play/pause FAB to `PlaybackServiceController` in `app/src/main/java/com/bl4ckswordsman/nekoyume/MainActivity.kt`
+- [ ] T019 [US2] Annotate `MainActivity` with `@AndroidEntryPoint`, connect play/pause FAB to `PlaybackServiceController`, and handle Android 13+ `POST_NOTIFICATIONS` runtime permission requests in `app/src/main/java/com/bl4ckswordsman/nekoyume/MainActivity.kt`
 
 **Checkpoint**: User Stories 1 and 2 complete. Lock screen and notification transport controls fully functional and synchronized with the UI.
 
