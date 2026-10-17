@@ -36,6 +36,23 @@ All audio logic, state transitions, and data operations MUST be covered by autom
 - Instrumented tests (`./gradlew connectedDebugAndroidTest`) MUST validate end-to-end user workflows and Compose UI interactions against supported Android API targets.
 - Every new feature or bug fix MUST include corresponding unit or instrumentation tests demonstrating expected behavior.
 
+### VII. Code Excellence: SoC, DRY, Readability & Efficiency
+All application code MUST adhere to strict software craftsmanship, architectural cleanliness, and performance standards:
+- **Separation of Concerns (SoC) & Single Responsibility (SRP)**:
+  - Core domain models MUST remain pure Kotlin data classes with zero dependencies on Android framework or UI classes.
+  - Distinct responsibilities—such as audio focus management, volume curve interpolation, asset catalog parsing, and player coordination—MUST be encapsulated in dedicated, single-purpose classes and exposed via clear interfaces.
+- **Don't Repeat Yourself (DRY) & Single Source of Truth**:
+  - The aggregate mix state (`AudioMixState`) MUST serve as the sole source of truth for runtime playback; duplicating state across disconnected local variables is prohibited.
+  - Shared domain formulas (such as volume attenuation and decibel scaling) MUST be centralized in reusable utility functions or domain extensions.
+- **Performance & Resource Hygiene**:
+  - Audio mixing MUST leverage native hardware offload (`AudioFlinger`), avoiding redundant CPU-bound software PCM buffer manipulations.
+  - Under no circumstances may media players, decoders, or hardware audio channels leak; all underlying resources MUST be explicitly and promptly released when stopped or torn down.
+  - High-frequency asynchronous operations (such as volume scrubbing ramps) MUST debounce and cancel preceding in-flight coroutines immediately to avoid wasted CPU cycles.
+- **Modern Kotlin Idioms & Readability**:
+  - Code MUST prefer immutability (`val`, immutable collections) by default.
+  - Public interfaces, functions, and state flows MUST be documented with clear KDoc comments specifying units, ranges, and invariants.
+  - Variable and function names MUST be self-descriptive and expressive, avoiding cryptic abbreviations or magic numbers.
+
 ## Technical Constraints & Platform Boundaries
 
 - **Target Platform**: The codebase MUST target Android with `compileSdk = 37`, `minSdk = 29`, and `targetSdk = 35`, compiled using JDK 17 with modern AGP and Kotlin.
@@ -59,4 +76,4 @@ This Constitution supersedes informal agreements and ad-hoc practices. Every arc
   - **PATCH** version bumps occur for non-semantic refinements, typos, or wording clarifications.
 - **Compliance**: Code reviews and Spec Kit analysis (`speckit-analyze`, `speckit-converge`) MUST verify compliance against this active document.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-17 | **Last Amended**: 2026-10-17
+**Version**: 1.1.0 | **Ratified**: 2026-10-17 | **Last Amended**: 2026-10-17
