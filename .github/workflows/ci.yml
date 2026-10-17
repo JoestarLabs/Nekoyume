@@ -106,7 +106,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-pixel-9-api-35
+          key: avd-api-35
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -118,7 +118,7 @@ jobs:
           api-level: 35
           target: default
           arch: x86_64
-          profile: pixel_9
+          force-avd-creation: false
           cores: 2
           ram-size: 4096M
           heap-size: 512M
@@ -133,7 +133,7 @@ jobs:
           api-level: 35
           target: default
           arch: x86_64
-          profile: pixel_9
+          force-avd-creation: false
           cores: 2
           ram-size: 4096M
           heap-size: 512M
