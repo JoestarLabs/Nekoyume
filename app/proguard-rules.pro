@@ -19,3 +19,19 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+
+# Google Hilt Dependency Injection
+-keep,allowobfuscation,allowshrinking @dagger.hilt.EntryPoint class *
+-keep,allowobfuscation,allowshrinking @dagger.hilt.GeneratesRootInput class *
+-keepclassmembers class * {
+    @javax.inject.Inject *;
+}
+
+# AndroidX Media3 Session & Playback Service
+-keep public class com.bl4ckswordsman.nekoyume.core.audio.service.NekoyumePlaybackService {
+    public <init>();
+}
+-keep class androidx.media3.session.MediaSessionService { *; }
+-keep class androidx.media3.session.MediaSession { *; }
+-keep interface androidx.media3.common.Player { *; }

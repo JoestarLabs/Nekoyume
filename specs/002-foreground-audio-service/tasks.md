@@ -107,10 +107,10 @@
 
 **Purpose**: ProGuard rules, static analysis, verification gates, and quickstart end-to-end scenario validation.
 
-- [ ] T026 [P] Add ProGuard keep rules for Hilt and MediaSessionService in `app/proguard-rules.pro`
-- [ ] T027 Run code quality check with `./gradlew lintDebug`
-- [ ] T028 Run full unit test suite with `./gradlew testDebugUnitTest`
-- [ ] T029 Execute end-to-end scenarios per `specs/002-foreground-audio-service/quickstart.md`
+- [X] T026 [P] Add ProGuard keep rules for Hilt and MediaSessionService in `app/proguard-rules.pro`
+- [X] T027 Run code quality check with `./gradlew lintDebug`
+- [X] T028 Run full unit test suite with `./gradlew testDebugUnitTest`
+- [X] T029 Execute end-to-end scenarios per `specs/002-foreground-audio-service/quickstart.md`
 
 ---
 
