@@ -6,10 +6,13 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.bl4ckswordsman.nekoyume.core.audio.focus.AudioFocusChangeListener
+import com.bl4ckswordsman.nekoyume.core.audio.focus.NekoyumeAudioFocusManager
 import com.bl4ckswordsman.nekoyume.core.audio.model.AudioFocusState
 import com.bl4ckswordsman.nekoyume.core.audio.model.AudioMixState
 import com.bl4ckswordsman.nekoyume.core.audio.model.TrackPlaybackState
 import com.bl4ckswordsman.nekoyume.core.audio.model.TrackPlaybackStatus
+import com.bl4ckswordsman.nekoyume.core.audio.ramp.VolumeRampHandler
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +24,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
@@ -31,13 +33,14 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * Coordinates a pool of up to 8 lightweight [Player] instances with hardware-mixed output,
  * seamless continuous looping, independent volume attenuation, master volume scaling,
- * and reactive [AudioMixState] distribution.
+ * platform audio focus management, and reactive [AudioMixState] distribution.
  */
 class Media3AudioLoopEngine(
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main.immediate,
+    private val focusManagerFactory: ((AudioFocusChangeListener) -> NekoyumeAudioFocusManager)? = null,
     private val playerFactory: (soundId: String, assetPath: String) -> Player
-) : AudioLoopEngine {
+) : AudioLoopEngine, AudioFocusChangeListener {
 
     /**
      * Primary Android runtime constructor taking application [Context].
@@ -45,6 +48,9 @@ class Media3AudioLoopEngine(
     constructor(context: Context) : this(
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
         dispatcher = Dispatchers.Main.immediate,
+        focusManagerFactory = { listener ->
+            NekoyumeAudioFocusManager(context = context, listener = listener)
+        },
         playerFactory = { _, assetPath ->
             val player = ExoPlayer.Builder(context).build()
             val uri = Uri.parse("asset:///$assetPath")
@@ -55,7 +61,8 @@ class Media3AudioLoopEngine(
 
     private val mutex = Mutex()
     private val players = ConcurrentHashMap<String, Player>()
-    private val rampHandler = com.bl4ckswordsman.nekoyume.core.audio.ramp.VolumeRampHandler(scope, dispatcher)
+    private val rampHandler = VolumeRampHandler(scope, dispatcher)
+    private val focusManager: NekoyumeAudioFocusManager? = focusManagerFactory?.invoke(this)
 
     private val _mixState = MutableStateFlow(AudioMixState())
     override val mixState: StateFlow<AudioMixState> = _mixState.asStateFlow()
@@ -79,6 +86,11 @@ class Media3AudioLoopEngine(
         }
 
         try {
+            // Request system audio focus on starting first track
+            if (players.isEmpty()) {
+                focusManager?.requestAudioFocus()
+            }
+
             val player = playerFactory(soundId, assetPath)
             player.repeatMode = Player.REPEAT_MODE_ONE
 
@@ -99,11 +111,8 @@ class Media3AudioLoopEngine(
                             }
                             updateTrackStatus(soundId, currentStatus)
                         }
-                        Player.STATE_IDLE -> {
-                            // Player stopped
-                        }
-                        Player.STATE_ENDED -> {
-                            // Handled by REPEAT_MODE_ONE
+                        Player.STATE_IDLE, Player.STATE_ENDED -> {
+                            // No-op for loop engine
                         }
                     }
                 }
@@ -158,6 +167,10 @@ class Media3AudioLoopEngine(
             val updated = state.activeTracks.toMutableMap()
             updated.remove(soundId)
             state.copy(activeTracks = updated)
+        }
+
+        if (players.isEmpty()) {
+            focusManager?.abandonAudioFocus()
         }
         Result.success(Unit)
     }
@@ -222,6 +235,7 @@ class Media3AudioLoopEngine(
             releasePlayer(player)
         }
         players.clear()
+        focusManager?.abandonAudioFocus()
         _mixState.update { it.copy(activeTracks = emptyMap(), isMasterPaused = false) }
     }
 
@@ -232,6 +246,29 @@ class Media3AudioLoopEngine(
     override fun release() {
         rampHandler.cancelAll()
         stopAll()
+    }
+
+    override fun onFocusGained() {
+        val wasDucked = _mixState.value.audioFocusState == AudioFocusState.DUCKED
+        _mixState.update { it.copy(audioFocusState = AudioFocusState.ACQUIRED) }
+        players.keys.forEach { applyTrackHardwareVolume(it) }
+        if (!wasDucked && !_mixState.value.isMasterPaused) {
+            players.values.forEach { it.play() }
+        }
+    }
+
+    override fun onFocusDucked() {
+        _mixState.update { it.copy(audioFocusState = AudioFocusState.DUCKED) }
+        players.keys.forEach { applyTrackHardwareVolume(it) }
+    }
+
+    override fun onFocusLost() {
+        _mixState.update { it.copy(audioFocusState = AudioFocusState.LOST) }
+        pauseAll()
+    }
+
+    override fun onBecomingNoisy() {
+        pauseAll()
     }
 
     private fun updateTrackStatus(soundId: String, status: TrackPlaybackStatus) {

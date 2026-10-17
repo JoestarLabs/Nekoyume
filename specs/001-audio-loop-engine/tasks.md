@@ -85,12 +85,12 @@
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T019 [P] [US3] Create unit test `AudioFocusManagerTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioFocusManagerTest.kt` verifying state transitions and duck multiplier ($D = 0.3f$) on `AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK`, pause on `AUDIOFOCUS_LOSS`, and recovery on `AUDIOFOCUS_GAIN`
+- [X] T019 [P] [US3] Create unit test `AudioFocusManagerTest` in `app/src/test/java/com/bl4ckswordsman/nekoyume/core/audio/AudioFocusManagerTest.kt` verifying state transitions and duck multiplier ($D = 0.3f$) on `AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK`, pause on `AUDIOFOCUS_LOSS`, and recovery on `AUDIOFOCUS_GAIN`
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Implement `NekoyumeAudioFocusManager` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/focus/NekoyumeAudioFocusManager.kt` using `AudioManager` / `AudioFocusRequestCompat` with `USAGE_MEDIA` and `CONTENT_TYPE_MUSIC`, plus `BroadcastReceiver` for `ACTION_AUDIO_BECOMING_NOISY`
-- [ ] T021 [US3] Wire `NekoyumeAudioFocusManager` into `Media3AudioLoopEngine.kt` to apply the 70% ducking multiplier ($D = 0.3f$) via `VolumeRampHandler` on transient focus loss and trigger `pauseAll()` on permanent loss or noisy disconnection
+- [X] T020 [US3] Implement `NekoyumeAudioFocusManager` in `app/src/main/java/com/bl4ckswordsman/nekoyume/core/audio/focus/NekoyumeAudioFocusManager.kt` using `AudioManager` / `AudioFocusRequestCompat` with `USAGE_MEDIA` and `CONTENT_TYPE_MUSIC`, plus `BroadcastReceiver` for `ACTION_AUDIO_BECOMING_NOISY`
+- [X] T021 [US3] Wire `NekoyumeAudioFocusManager` into `Media3AudioLoopEngine.kt` to apply the 70% ducking multiplier ($D = 0.3f$) via `VolumeRampHandler` on transient focus loss and trigger `pauseAll()` on permanent loss or noisy disconnection
 
 **Checkpoint**: All three user stories are complete, integrated, and verified against platform lifecycle events!
 
