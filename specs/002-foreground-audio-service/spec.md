@@ -7,6 +7,17 @@
 
 ---
 
+## Clarifications
+
+### Session 2026-10-17
+- Q: When the user clears or swipes away the application from the Android recent apps list while audio is actively playing, how should the background playback service behave? → A: Continue playing audio uninterrupted with the foreground service and notification active until explicitly paused or stopped by the user.
+- Q: If the Android system terminates the playback service under extreme memory pressure while audio is playing, how should the service behave upon process revival? → A: Restore the mix in a paused state with notification available for immediate one-tap resumption.
+- Q: How should the background playback service handle transient audio focus loss, such as system navigation prompts or notification sounds? → A: Duck (smoothly lower) volume during transient focus loss; pause completely on permanent focus loss.
+- Q: Is an automatic sleep timer (e.g., countdown to auto-stop playback after a set duration) in scope for this feature or deferred to a subsequent feature? → A: Out of scope; defer sleep timer functionality to a dedicated future feature.
+- Q: When audio playback is paused, should the background service automatically shut down after an idle timeout to prevent battery drain? → A: Automatically stop the service and dismiss foreground notification after 15 minutes of inactivity while paused.
+
+---
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Continuous Background Playback During Screen-Off & Multitasking (Priority: P1)
@@ -50,16 +61,20 @@ As a battery-conscious mobile user, I want the background audio service and syst
 
 **Acceptance Scenarios**:
 1. **Given** playback is paused, **When** the user dismisses the notification or triggers a stop command, **Then** the background audio service stops, removes the foreground notification, and releases all media resources.
-2. **Given** the application is explicitly swiped away from the system Recents task manager while playback is stopped, **When** the system cleans up the task, **Then** no orphaned service processes remain running in the background.
-3. **Given** playback is active and the system experiences critical memory pressure, **When** the background service must manage its memory footprint, **Then** all internal allocations remain bounded and non-essential caches are trimmed.
+2. **Given** the application is swiped away from the system Recents task manager while audio is actively playing, **When** the task is removed, **Then** playback continues uninterrupted with the foreground service and notification remaining active.
+3. **Given** the application is explicitly swiped away from the system Recents task manager while playback is stopped, **When** the system cleans up the task, **Then** no orphaned service processes remain running in the background.
+4. **Given** playback is active and the system experiences critical memory pressure, **When** the background service must manage its memory footprint, **Then** all internal allocations remain bounded and non-essential caches are trimmed.
+5. **Given** playback is paused, **When** no user interaction occurs for 15 consecutive minutes, **Then** the service automatically stops, dismisses the foreground notification, and releases all audio resources.
 
 ---
 
 ### Edge Cases
 
 - **Notification Permission Denied (Android 13+)**: If the user denies or revokes the notification runtime permission, background audio must still function, but the user should be gracefully notified that lock screen controls will be unavailable.
-- **System Memory Pressure (Low Memory Killer)**: If the system kills the foreground service under severe memory constraints, the last mix configuration must be preserved so playback can be restored upon restart.
+- **App Task Removal During Playback**: Swiping away the application from the Android Recents task manager while audio is actively playing does not stop playback; the service remains running in the foreground with notification controls intact.
+- **System Memory Pressure (Low Memory Killer)**: If the system kills the foreground service under severe memory constraints, the last mix configuration is preserved; upon process revival, the service restores the mix in a paused state with the media notification ready for immediate one-tap resumption, avoiding unexpected audio playback.
 - **Audio Becoming Noisy**: When headphones are unplugged or Bluetooth disconnects while the screen is off, the service must immediately pause playback and update the notification to reflect the paused state.
+- **Audio Focus Transitions**: When system audio focus is lost transiently (e.g., turn-by-turn navigation prompt or notification chime), the service MUST smoothly duck ambient volume and restore it once focus is regained; when focus is lost permanently (e.g., incoming phone call or external media app playback), the service MUST pause playback immediately.
 - **Rapid Notification Scrubbing**: Rapidly tapping play/pause on the lock screen widget must debounce cleanly without spawning overlapping player instances or corrupting the playback state machine.
 
 ---
@@ -80,6 +95,10 @@ As a battery-conscious mobile user, I want the background audio service and syst
 - **FR-010**: All UI components, ViewModels, and Services MUST receive their dependencies through dependency injection without manual service locators or static singletons.
 - **FR-011**: The system MUST handle device sleep and CPU power management so background playback does not stall or drop samples when the display is powered off.
 - **FR-012**: The background service MUST synchronize state bi-directionally with the core audio loop engine and expose reactive state updates to connected clients.
+- **FR-013**: Swiping the application away from the Android Recent tasks list while audio is actively playing MUST NOT terminate playback; the foreground service MUST continue playing uninterrupted until explicitly paused or stopped by the user.
+- **FR-014**: If the background service is recreated after being terminated due to system memory pressure, it MUST restore the saved mix state in a paused condition and publish a media notification ready for user resumption.
+- **FR-015**: The system MUST manage Android audio focus transitions, smoothly ducking ambient playback volume during transient focus loss and pausing playback immediately upon permanent focus loss.
+- **FR-016**: The background service MUST implement an automatic idle timeout that stops the service, dismisses the foreground notification, and releases audio resources after 15 minutes of continuous inactivity in the paused state.
 
 ---
 
@@ -99,7 +118,7 @@ As a battery-conscious mobile user, I want the background audio service and syst
 - **SC-001**: Background audio playback sustains continuous, gapless looping for 8+ continuous hours with the screen turned off without audio drops or process termination.
 - **SC-002**: Transport control actions triggered from the lock screen notification (play, pause, stop) execute within 100 milliseconds.
 - **SC-003**: The background audio service consumes less than 1.5% battery per hour during continuous screen-off multi-stream playback.
-- **SC-004**: When playback is stopped or dismissed, 100% of background service instances, notification banners, and audio wake locks are cleanly released within 1 second.
+- **SC-004**: When playback is stopped, dismissed, or idle timeout (15 minutes) expires while paused, 100% of background service instances, notification banners, and audio wake locks are cleanly released within 1 second.
 - **SC-005**: Dependency injection graph resolves completely at application startup in under 50 milliseconds without circular dependencies or runtime initialization errors.
 
 ---
@@ -109,3 +128,4 @@ As a battery-conscious mobile user, I want the background audio service and syst
 - The target platform is Android 10+ (API 29+), with explicit support for Android 13+ notification permissions and Android 14+ foreground service types.
 - The playback service integrates directly with the headless `AudioLoopEngine` implemented in Feature 001.
 - Bluetooth / media button hardware key events (e.g., headphone click to pause) will be mediated through the platform MediaSession.
+- Automatic sleep timer functionality (e.g., countdown timer to auto-stop playback after a specified duration) is explicitly out of scope for Feature 002 and deferred to a dedicated future feature.
