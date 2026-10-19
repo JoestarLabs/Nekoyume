@@ -98,7 +98,9 @@ class MultiStreamPlayerAdapterTest {
 
         val metadataOne = adapter.mediaMetadata
         assertEquals("Nekoyume Soundscape", metadataOne.title.toString())
-        assertEquals("Playing 1 sound", metadataOne.artist.toString())
+        assertEquals("Rain", metadataOne.displayTitle.toString())
+        assertEquals("Rain", metadataOne.subtitle.toString())
+        assertEquals("1 sound playing", metadataOne.artist.toString())
 
         // 3 tracks
         fakeEngine.emitMixState(
@@ -115,7 +117,9 @@ class MultiStreamPlayerAdapterTest {
 
         val metadataThree = adapter.mediaMetadata
         assertEquals("Nekoyume Soundscape", metadataThree.title.toString())
-        assertEquals("Playing 3 sounds", metadataThree.artist.toString())
+        assertEquals("Rain · Wind · Fire", metadataThree.displayTitle.toString())
+        assertEquals("Rain · Wind · Fire", metadataThree.subtitle.toString())
+        assertEquals("3 sounds playing", metadataThree.artist.toString())
 
         val mediaItem = adapter.currentMediaItem
         assertNotNull(mediaItem)

@@ -30,7 +30,7 @@ interface AudioFocusChangeListener {
 class NekoyumeAudioFocusManager(
     private val context: Context? = null,
     private val audioManager: AudioManager? = context?.getSystemService(Context.AUDIO_SERVICE) as? AudioManager,
-    private val listener: AudioFocusChangeListener
+    var listener: AudioFocusChangeListener? = null
 ) : AudioManager.OnAudioFocusChangeListener {
 
     private val _focusState = MutableStateFlow(AudioFocusState.NONE)
@@ -72,7 +72,7 @@ class NekoyumeAudioFocusManager(
 
         if (granted) {
             _focusState.value = AudioFocusState.ACQUIRED
-            listener.onFocusGained()
+            listener?.onFocusGained()
         }
         return granted
     }
@@ -93,19 +93,19 @@ class NekoyumeAudioFocusManager(
         when (focusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
                 _focusState.value = AudioFocusState.ACQUIRED
-                listener.onFocusGained()
+                listener?.onFocusGained()
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
                 _focusState.value = AudioFocusState.DUCKED
-                listener.onFocusDucked()
+                listener?.onFocusDucked()
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 _focusState.value = AudioFocusState.LOST
-                listener.onFocusLost()
+                listener?.onFocusLost()
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
                 _focusState.value = AudioFocusState.LOST
-                listener.onFocusLost()
+                listener?.onFocusLost()
             }
         }
     }
@@ -114,7 +114,7 @@ class NekoyumeAudioFocusManager(
      * Public handler for headphone/Bluetooth disconnection.
      */
     fun onBecomingNoisy() {
-        listener.onBecomingNoisy()
+        listener?.onBecomingNoisy()
     }
 
     private fun registerNoisyReceiver() {

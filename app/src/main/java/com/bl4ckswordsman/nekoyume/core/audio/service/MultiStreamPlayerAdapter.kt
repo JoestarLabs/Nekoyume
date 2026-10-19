@@ -49,7 +49,7 @@ class MultiStreamPlayerAdapter(
 
         scope.launch {
             audioEngine.mixState
-                .map { state -> state.playingTrackCount }
+                .map { state -> state.activeTracks.keys to state.playingTrackCount }
                 .distinctUntilChanged()
                 .collect {
                     val metadata = mediaMetadata
@@ -112,18 +112,27 @@ class MultiStreamPlayerAdapter(
     }
 
     override fun getMediaMetadata(): MediaMetadata {
-        val activeCount = audioEngine.mixState.value.playingTrackCount
+        val mix = audioEngine.mixState.value
+        val activeCount = mix.playingTrackCount
         val title = if (activeCount > 0) "Nekoyume Soundscape" else "Nekoyume"
-        val description = when {
-            activeCount == 0 -> "Ready"
-            activeCount == 1 -> "Playing 1 sound"
-            else -> "Playing $activeCount sounds"
+        val builder = MediaMetadata.Builder().setTitle(title)
+
+        if (activeCount == 0) {
+            builder.setArtist("Ready")
+                .setDescription("Ready")
+        } else {
+            val soundNames = mix.activeTracks.keys.joinToString(" · ") { name ->
+                name.replaceFirstChar { char ->
+                    if (char.isLowerCase()) char.titlecase() else char.toString()
+                }
+            }
+            val countText = if (activeCount == 1) "1 sound playing" else "$activeCount sounds playing"
+            builder.setDisplayTitle(soundNames)
+                .setSubtitle(soundNames)
+                .setArtist(countText)
+                .setDescription(countText)
         }
-        return MediaMetadata.Builder()
-            .setTitle(title)
-            .setArtist(description)
-            .setDescription(description)
-            .build()
+        return builder.build()
     }
 
     override fun getCurrentMediaItem(): MediaItem? {

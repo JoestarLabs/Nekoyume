@@ -25,17 +25,15 @@ class NekoyumePlaybackService : MediaSessionService() {
     @Inject
     lateinit var audioEngine: AudioLoopEngine
 
+    @Inject
+    lateinit var mixPersistence: MixStatePersistence
+
     private var mediaSession: MediaSession? = null
     private var playerAdapter: MultiStreamPlayerAdapter? = null
     private var basePlayer: ExoPlayer? = null
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private lateinit var idleTimeoutHandler: ServiceIdleTimeoutHandler
-
-    companion object {
-        const val PREFS_NAME = "nekoyume_playback_prefs"
-        const val KEY_SAVED_MIX = "saved_mix_state"
-    }
 
     override fun onCreate() {
         super.onCreate()
@@ -80,16 +78,8 @@ class NekoyumePlaybackService : MediaSessionService() {
                 )
 
                 if (mixState.hasActiveTracks) {
-                    val serialized = ServiceStateRestorer.serialize(mixState)
-                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                        .edit()
-                        .putString(KEY_SAVED_MIX, serialized)
-                        .apply()
+                    mixPersistence.saveMixState(mixState)
                 } else {
-                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                        .edit()
-                        .remove(KEY_SAVED_MIX)
-                        .apply()
                     stopSelf()
                 }
             }
@@ -97,14 +87,14 @@ class NekoyumePlaybackService : MediaSessionService() {
     }
 
     private fun restoreSavedMixIfAvailable() {
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val saved = prefs.getString(KEY_SAVED_MIX, null) ?: return
-        val restored = ServiceStateRestorer.deserialize(saved) ?: return
+        serviceScope.launch {
+            val restored = mixPersistence.getSavedMixState() ?: return@launch
 
-        // In accordance with FR-014: state restored in paused condition
-        if (restored.hasActiveTracks && !audioEngine.mixState.value.hasActiveTracks) {
-            // Restore saved master volume
-            audioEngine.setMasterVolume(restored.masterVolume)
+            // In accordance with FR-014: state restored in paused condition
+            if (restored.hasActiveTracks && !audioEngine.mixState.value.hasActiveTracks) {
+                // Restore saved master volume
+                audioEngine.setMasterVolume(restored.masterVolume)
+            }
         }
     }
 

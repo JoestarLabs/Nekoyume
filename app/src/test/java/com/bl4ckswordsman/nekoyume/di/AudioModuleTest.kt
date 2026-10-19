@@ -37,6 +37,32 @@ class AudioModuleTest {
     }
 
     @Test
+    fun provideAudioFocusManager_hasSingletonAndProvidesAnnotations() {
+        val method = AudioModule::class.java.methods.firstOrNull { it.name == "provideAudioFocusManager" }
+        assertNotNull("provideAudioFocusManager method must exist", method)
+        assertTrue("Method must be annotated with @Provides", method!!.isAnnotationPresent(Provides::class.java))
+        assertTrue("Method must be annotated with @Singleton", method.isAnnotationPresent(Singleton::class.java))
+        assertEquals(com.bl4ckswordsman.nekoyume.core.audio.focus.NekoyumeAudioFocusManager::class.java, method.returnType)
+    }
+
+    @Test
+    fun providePreferencesDataStore_hasSingletonAndProvidesAnnotations() {
+        val method = AudioModule::class.java.methods.firstOrNull { it.name == "providePreferencesDataStore" }
+        assertNotNull("providePreferencesDataStore method must exist", method)
+        assertTrue("Method must be annotated with @Provides", method!!.isAnnotationPresent(Provides::class.java))
+        assertTrue("Method must be annotated with @Singleton", method.isAnnotationPresent(Singleton::class.java))
+    }
+
+    @Test
+    fun provideSessionToken_hasSingletonAndProvidesAnnotations() {
+        val method = AudioModule::class.java.methods.firstOrNull { it.name == "provideSessionToken" }
+        assertNotNull("provideSessionToken method must exist", method)
+        assertTrue("Method must be annotated with @Provides", method!!.isAnnotationPresent(Provides::class.java))
+        assertTrue("Method must be annotated with @Singleton", method.isAnnotationPresent(Singleton::class.java))
+        assertEquals(androidx.media3.session.SessionToken::class.java, method.returnType)
+    }
+
+    @Test
     fun provideAudioLoopEngine_hasSingletonAndProvidesAnnotations() {
         val method = AudioModule::class.java.methods.firstOrNull { it.name == "provideAudioLoopEngine" }
         assertNotNull("provideAudioLoopEngine method must exist", method)

@@ -120,4 +120,66 @@ class PlaybackServiceControllerTest {
         controller.setTrackVolume("ocean", 0.65f)
         assertEquals("ocean" to 0.65f, fakeEngine.lastTrackVolumeSet)
     }
+
+    private class FakeMixStatePersistence(
+        private var savedState: AudioMixState? = null
+    ) : MixStatePersistence {
+        override val savedMixState = kotlinx.coroutines.flow.flowOf(savedState)
+        override suspend fun getSavedMixState(): AudioMixState? = savedState
+        override suspend fun saveMixState(mixState: AudioMixState) {
+            savedState = mixState
+        }
+    }
+
+    @Test
+    fun controller_coldLaunchRestore_restoresSavedMixAsInactiveWithoutAutoPlay() = runTest {
+        val savedMix = AudioMixState(
+            isMasterPaused = false,
+            masterVolume = 0.9f,
+            activeTracks = mapOf(
+                "rain" to TrackPlaybackState("rain", TrackPlaybackStatus.PLAYING, 0.8f),
+                "fire" to TrackPlaybackState("fire", TrackPlaybackStatus.PLAYING, 0.5f)
+            )
+        )
+        val fakePersistence = FakeMixStatePersistence(savedMix)
+
+        val controller = PlaybackServiceControllerImpl(
+            context = fakeContext,
+            audioEngine = fakeEngine,
+            mixPersistence = fakePersistence,
+            scope = testScope
+        )
+        testScope.advanceUntilIdle()
+
+        // FR-017 & US1/AC4: Restored mix must display active tracks in inactive (stopped) state
+        val restoredMix = controller.mixState.value
+        assertEquals(2, restoredMix.activeTracks.size)
+        assertTrue("Mix must be paused on cold launch restore", restoredMix.isMasterPaused)
+        assertEquals(TrackPlaybackStatus.PAUSED, restoredMix.activeTracks["rain"]?.status)
+        assertEquals(TrackPlaybackStatus.PAUSED, restoredMix.activeTracks["fire"]?.status)
+
+        // Playback must NOT auto-start
+        assertFalse("Playback must NOT auto-start on cold launch", restoredMix.isPlaying)
+        assertEquals(ServicePlaybackState.STOPPED, controller.serviceState.value.playbackState)
+        assertFalse(controller.serviceState.value.isForeground)
+        assertFalse(fakeEngine.resumeAllCalled)
+    }
+
+    @Test
+    fun controller_firstLaunch_initializesWithEmptyMix() = runTest {
+        val fakePersistence = FakeMixStatePersistence(null)
+
+        val controller = PlaybackServiceControllerImpl(
+            context = fakeContext,
+            audioEngine = fakeEngine,
+            mixPersistence = fakePersistence,
+            scope = testScope
+        )
+        testScope.advanceUntilIdle()
+
+        val initialMix = controller.mixState.value
+        assertTrue("First launch mix must be empty", initialMix.activeTracks.isEmpty())
+        assertFalse(initialMix.isPlaying)
+        assertEquals(ServicePlaybackState.STOPPED, controller.serviceState.value.playbackState)
+    }
 }
