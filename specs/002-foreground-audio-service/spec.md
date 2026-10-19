@@ -16,6 +16,13 @@
 - Q: Is an automatic sleep timer (e.g., countdown to auto-stop playback after a set duration) in scope for this feature or deferred to a subsequent feature? → A: Out of scope; defer sleep timer functionality to a dedicated future feature.
 - Q: When audio playback is paused, should the background service automatically shut down after an idle timeout to prevent battery drain? → A: Automatically stop the service and dismiss foreground notification after 15 minutes of inactivity while paused.
 
+### Session 2026-10-20
+- Q: How should ViewModels and UI components receive reactive playback state updates from the background PlaybackService — what is the primary communication bridge? → A: `MediaController` + `SessionToken` — UI binds via Media3's built-in session API; ViewModel holds a `MediaController` instance.
+- Q: What should the media notification display as its primary text content when multiple sounds are actively playing — how is the soundscape identity communicated to the user? → A: Track count + sound names — subtitle shows active sound names joined by `·` (e.g., `"Rain · Forest · Fire"`); secondary text shows `"N sounds playing"`.
+- Q: When the background service is recreated after system memory pressure, where should the last-known mix state be persisted so it can be restored? → A: `DataStore<Preferences>` — written asynchronously on each mix change via a coroutine `Flow`; survives process death without a full Room schema.
+- Q: When the user explicitly stops playback, should the `DataStore` mix state be cleared or preserved for next session? → A: Preserve — `DataStore` retains the last mix on explicit stop; it is overwritten naturally as sounds change and never erased on stop.
+- Q: On a normal cold app launch, should the UI restore the last-saved mix from `DataStore` with sounds shown as inactive, or always open with a clean empty state? → A: Restore last mix — UI loads saved sound selections shown as inactive on every cold launch; playback does NOT auto-start.
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*
@@ -32,6 +39,7 @@ As a listener using ambient soundscapes for sleeping or focused work, I want aud
 1. **Given** one or more ambient audio streams are playing, **When** the user turns off the screen or the screen times out, **Then** playback continues smoothly and uninterrupted.
 2. **Given** ambient playback is active, **When** the user navigates to the home screen or opens another application, **Then** playback persists in the background.
 3. **Given** the device enters system power-saving or low-power standby modes, **When** audio is actively playing, **Then** the audio service holds necessary system execution locks to prevent sleep-induced playback stalls.
+4. **Given** the user had a previous mix saved and launches the app fresh (cold start), **When** the main screen appears, **Then** the last-saved sound selections are displayed as inactive and ready to play — without auto-starting audio.
 
 ---
 
@@ -41,7 +49,7 @@ As a user listening to ambient sounds while my phone is locked or in my pocket, 
 
 **Why this priority**: Quick, accessible controls are essential for convenient everyday usage—especially when waking up at night or receiving an in-person interruption.
 
-**Independent Test**: Start playback and verify that a system media notification appears displaying the app identity, active playback summary (e.g., "Playing 3 sounds"), and interactive controls. Toggling pause from the notification halts audio and changes the icon to play; tapping play resumes audio immediately.
+**Independent Test**: Start playback of three sounds (e.g., Rain, Forest, Fire) and verify that a system media notification appears with subtitle `"Rain · Forest · Fire"` and secondary text `"3 sounds playing"`, along with interactive controls. Toggling pause from the notification halts audio and changes the icon to play; tapping play resumes audio immediately.
 
 **Acceptance Scenarios**:
 1. **Given** playback has started, **When** the user checks the notification shade or lock screen, **Then** a media notification is present showing the current soundscape state and playback controls.
@@ -76,6 +84,7 @@ As a battery-conscious mobile user, I want the background audio service and syst
 - **Audio Becoming Noisy**: When headphones are unplugged or Bluetooth disconnects while the screen is off, the service must immediately pause playback and update the notification to reflect the paused state.
 - **Audio Focus Transitions**: When system audio focus is lost transiently (e.g., turn-by-turn navigation prompt or notification chime), the service MUST smoothly duck ambient volume and restore it once focus is regained; when focus is lost permanently (e.g., incoming phone call or external media app playback), the service MUST pause playback immediately.
 - **Rapid Notification Scrubbing**: Rapidly tapping play/pause on the lock screen widget must debounce cleanly without spawning overlapping player instances or corrupting the playback state machine.
+- **Explicit Stop vs. LMK Recovery**: When the user explicitly stops playback, the `DataStore` mix state is preserved but the service is fully torn down; on the next cold launch, the UI reflects the saved mix (sounds shown as inactive) but playback does NOT auto-start. LMK recovery (FR-014), by contrast, restores the mix in a paused state with the notification visible for immediate one-tap resumption.
 
 ---
 
@@ -87,18 +96,19 @@ As a battery-conscious mobile user, I want the background audio service and syst
 - **FR-002**: The background service MUST be promoted to a foreground service with the media playback type whenever one or more audio streams are actively playing.
 - **FR-003**: The system MUST publish and maintain an ongoing system media notification while the service is in the foreground.
 - **FR-004**: The media notification MUST provide actionable transport controls: Play, Pause, and Stop.
-- **FR-005**: The media notification MUST dynamically reflect the active soundscape state, including track count and playback status.
+- **FR-005**: The media notification MUST dynamically reflect the active soundscape state: the notification subtitle MUST display active sound names joined by ` · ` (e.g., `"Rain · Forest · Fire"`), and the secondary text MUST display the active count as `"N sounds playing"`. Both fields MUST update in real time as sounds are added or removed.
 - **FR-006**: Tapping the media notification MUST navigate the user back to the application's primary interface.
 - **FR-007**: When playback is paused, the media notification MUST become dismissible, allowing the user to swipe it away to stop the service.
-- **FR-008**: Stopping playback from the notification or application MUST demote the service from foreground status and release all audio hardware locks.
+- **FR-008**: Stopping playback from the notification or application MUST demote the service from foreground status and release all audio hardware locks. Stopping MUST NOT erase the persisted `DataStore` mix state; the last mix configuration is retained for subsequent sessions.
 - **FR-009**: The system MUST establish clean dependency injection bindings for all audio core components (`AudioLoopEngine`, `SoundCatalogRepository`, audio focus managers) scoped as singletons.
 - **FR-010**: All UI components, ViewModels, and Services MUST receive their dependencies through dependency injection without manual service locators or static singletons.
 - **FR-011**: The system MUST handle device sleep and CPU power management so background playback does not stall or drop samples when the display is powered off.
-- **FR-012**: The background service MUST synchronize state bi-directionally with the core audio loop engine and expose reactive state updates to connected clients.
+- **FR-012**: The background service MUST synchronize state bi-directionally with the core audio loop engine and expose reactive state updates to connected UI clients exclusively via the Media3 `MediaController` / `SessionToken` API; ViewModels MUST obtain a `MediaController` instance through the DI graph and MUST NOT bind to the service via custom `Binder` interfaces or static singletons.
 - **FR-013**: Swiping the application away from the Android Recent tasks list while audio is actively playing MUST NOT terminate playback; the foreground service MUST continue playing uninterrupted until explicitly paused or stopped by the user.
-- **FR-014**: If the background service is recreated after being terminated due to system memory pressure, it MUST restore the saved mix state in a paused condition and publish a media notification ready for user resumption.
+- **FR-014**: If the background service is recreated after being terminated due to system memory pressure, it MUST restore the saved mix state — persisted in `DataStore<Preferences>` (active sound IDs and per-track volumes written asynchronously on every mix change) — in a paused condition and publish a media notification ready for user resumption.
 - **FR-015**: The system MUST manage Android audio focus transitions, smoothly ducking ambient playback volume during transient focus loss and pausing playback immediately upon permanent focus loss.
 - **FR-016**: The background service MUST implement an automatic idle timeout that stops the service, dismisses the foreground notification, and releases audio resources after 15 minutes of continuous inactivity in the paused state.
+- **FR-017**: On every cold application launch, the UI MUST read the persisted `DataStore<Preferences>` mix state and display the last-saved sound selections in an inactive (stopped) state. Playback MUST NOT auto-start; the user must explicitly initiate playback. If no prior state exists (first launch), the UI MUST present an empty mix.
 
 ---
 
@@ -107,7 +117,7 @@ As a battery-conscious mobile user, I want the background audio service and syst
 - **Media Session**: The platform bridge exposing active soundscape metadata and accepting remote transport commands from notifications, lock screens, and Bluetooth devices.
 - **Media Notification**: The system-level UI component representing the active audio service in the notification drawer and lock screen.
 - **Playback Service**: The long-running Android service component managing the audio engine lifecycle, foreground promotion, and system wakefulness.
-- **Service Connection/Controller**: The client-side interface utilized by UI components and ViewModels to communicate commands and observe state from the playback service.
+- **MediaController / SessionToken**: The Media3-native client-side handle through which ViewModels and UI components issue transport commands (play, pause, stop) and observe playback state from the `PlaybackService`. Obtained via `MediaController.Builder(context, sessionToken).buildAsync()` and provided through Hilt injection.
 
 ---
 
@@ -129,3 +139,4 @@ As a battery-conscious mobile user, I want the background audio service and syst
 - The playback service integrates directly with the headless `AudioLoopEngine` implemented in Feature 001.
 - Bluetooth / media button hardware key events (e.g., headphone click to pause) will be mediated through the platform MediaSession.
 - Automatic sleep timer functionality (e.g., countdown timer to auto-stop playback after a specified duration) is explicitly out of scope for Feature 002 and deferred to a dedicated future feature.
+- Mix state persistence (active sound IDs + per-track volumes) uses `DataStore<Preferences>` as the sole persistence layer for this feature; a full Room database schema for mix presets or history is out of scope and deferred to a future feature.

@@ -31,4 +31,4 @@
 
 ## Notes
 
-All quality criteria pass. Ready for `/speckit-clarify` or `/speckit-plan`.
+All quality criteria pass. API names added during the 2026-10-20 clarification session (`DataStore<Preferences>`, `MediaController`, `SessionToken`) are constitution-mandated technology selections, consistent with the level of specificity already present in the original spec. Ready for `/speckit-plan`.
