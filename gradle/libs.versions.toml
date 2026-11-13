@@ -12,7 +12,7 @@ media3 = "1.11.1"
 coroutines = "1.11.0"
 json = "20240303"
 hilt = "2.60.1"
-ksp = "2.3.12"
+ksp = "2.3.14"
 datastore = "1.2.1"
 
 [libraries]
